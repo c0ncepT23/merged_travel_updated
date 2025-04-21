@@ -32,38 +32,6 @@ type ProfileScreenNavigationProp = StackNavigationProp<
   'Profile'
 >;
 
-// Mock action to fetch profile
-const fetchProfile = () => {
-  return (dispatch: any) => {
-    dispatch({ type: 'FETCH_PROFILE_REQUEST' });
-    
-    // Simulate API call
-    setTimeout(() => {
-      const mockProfile = {
-        id: 'user123',
-        name: 'John Smith',
-        email: 'john@example.com',
-        avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-        coverPhoto: 'https://images.unsplash.com/photo-1527631746610-bca00a040d60',
-        bio: 'Travel enthusiast and food lover. Always looking for new adventures and authentic experiences around the world!',
-        country: 'United States',
-        languages: ['English', 'Spanish', 'French'],
-        travelPreferences: ['Food', 'Culture', 'Nature', 'Adventure', 'Photography'],
-        tripCount: 12,
-        documents: 5,
-        photos: 124,
-        followers: 85,
-        following: 112
-      };
-      
-      dispatch({
-        type: 'FETCH_PROFILE_SUCCESS',
-        payload: mockProfile,
-      });
-    }, 1000);
-  };
-};
-
 const { width } = Dimensions.get('window');
 const HEADER_MAX_HEIGHT = 220;
 const HEADER_MIN_HEIGHT = 84;
@@ -172,7 +140,7 @@ const ProfileScreen: React.FC = () => {
         <Text style={styles.errorText}>Error loading profile</Text>
         <TouchableOpacity
           style={styles.retryButton}
-          onPress={() => dispatch(fetchProfile() as any)}
+          onPress={() => dispatch(fetchUserProfile() as any)}
         >
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>

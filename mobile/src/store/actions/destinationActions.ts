@@ -1,4 +1,4 @@
-// In src/store/actions/destinationActions.ts (create this file)
+// In src/store/actions/destinationActions.ts
 import { Dispatch } from 'redux';
 import { destinationService } from '../../services/firebase/firestoreService';
 import {
@@ -6,8 +6,11 @@ import {
   FETCH_DESTINATIONS_SUCCESS,
   FETCH_DESTINATIONS_FAILURE,
   JOIN_DESTINATION_GROUP,
-  LEAVE_DESTINATION_GROUP
+  LEAVE_DESTINATION_GROUP,
+  FETCH_THINGS_TO_SEE_SUCCESS,
+  FETCH_THINGS_TO_SEE_FAILURE
 } from '../reducers/destinationReducer';
+import { Attraction } from '../reducers/destinationReducer';
 
 // Fetch all destinations
 export const fetchDestinations = () => {
@@ -68,6 +71,32 @@ export const leaveDestinationGroup = (destinationId: string, subDestinationId?: 
     } catch (error) {
       console.error('Error leaving destination:', error);
       throw error;
+    }
+  };
+};
+
+// Fetch attractions for a destination
+export const fetchAttractions = (destinationId: string, subDestinationId?: string) => {
+  return async (dispatch: Dispatch) => {
+    dispatch({ type: 'FETCH_THINGS_TO_SEE_REQUEST' });
+    
+    try {
+      // Get attractions from API or service
+      const attractions = await destinationService.getAttractions(destinationId, subDestinationId);
+      
+      dispatch({
+        type: FETCH_THINGS_TO_SEE_SUCCESS,
+        payload: {
+          destinationId,
+          attractions,
+        },
+      });
+    } catch (error) {
+      console.error('Error fetching attractions:', error);
+      dispatch({
+        type: FETCH_THINGS_TO_SEE_FAILURE,
+        payload: error.message,
+      });
     }
   };
 };

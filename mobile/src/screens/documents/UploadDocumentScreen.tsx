@@ -383,7 +383,7 @@ const UploadDocumentScreen: React.FC = () => {
   const handleSubmit = async () => {
     const fileUri = selectedFile?.uri;
     const fileType = selectedFile?.type || '';
-
+  
     if (!fileUri) {
       Alert.alert('Error', 'Please select a document to upload');
       return;
@@ -394,12 +394,14 @@ const UploadDocumentScreen: React.FC = () => {
     try {
       console.log('Processing document:', fileUri, fileType);
       
-      // Check if it's an image
+      // Check if it's an image or PDF
       const isImage = fileType.toLowerCase().includes('image') || 
-                      fileUri.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/);
+                    fileUri.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/);
+      const isPdf = fileType.toLowerCase().includes('pdf') || 
+                  fileUri.toLowerCase().endsWith('.pdf');
       
-      if (!isImage) {
-        Alert.alert('Unsupported File Type', 'Currently only images can be processed. Please upload an image document.');
+      if (!isImage && !isPdf) {
+        Alert.alert('Unsupported File Type', 'Currently only images and PDFs can be processed. Please upload an image or PDF document.');
         setUploading(false);
         return;
       }
@@ -563,7 +565,7 @@ const UploadDocumentScreen: React.FC = () => {
 
   const testUpload = async () => {
     try {
-      // Use the ngrok URL
+      // Use the configured server URL - replace this with your actual server URL in production
       const ngrokUrl = "https://0a53-2406-b400-b4-a2de-c45e-60e0-70c0-6e40.ngrok-free.app";
       
       // Pick an image
@@ -585,12 +587,12 @@ const UploadDocumentScreen: React.FC = () => {
       const formData = new FormData();
       formData.append('image', {
         uri: uri,
-        name: 'test.jpg',
+        name: 'document.jpg',
         type: 'image/jpeg'
       });
       
-      console.log('Sending test upload to server...');
-      const uploadResponse = await fetch(`${ngrokUrl}/api/ocr`, {
+      console.log('Sending upload to OCR server...');
+      const uploadResponse = await fetch(`${serverUrl}/api/ocr`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -598,9 +600,18 @@ const UploadDocumentScreen: React.FC = () => {
         },
       });
       
+      if (!uploadResponse.ok) {
+        throw new Error(`Server returned status ${uploadResponse.status}`);
+      }
+      
       const uploadResult = await uploadResponse.json();
       console.log('Upload result:', uploadResult);
-      Alert.alert('Upload Result', JSON.stringify(uploadResult));
+      
+      if (uploadResult.success) {
+        Alert.alert('OCR Successful', 'Document text extracted successfully');
+      } else {
+        Alert.alert('OCR Failed', uploadResult.error || 'Unknown error occurred');
+      }
     } catch (error) {
       console.error('Upload error:', error);
       Alert.alert('Upload Error', error.toString());

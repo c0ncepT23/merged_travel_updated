@@ -19,106 +19,10 @@ import { DestinationsStackParamList } from '../../navigation/DestinationsNavigat
 import { RootState } from '../../store/reducers';
 import { Attraction } from '../../store/reducers/destinationReducer';
 import EmptyStateView from '../../components/common/EmptyStateView';
+import { fetchAttractions } from '../../store/actions/destinationActions';
 
 type ThingsToSeeRouteProp = RouteProp<DestinationsStackParamList, 'ThingsToSee'>;
 type ThingsToSeeNavigationProp = StackNavigationProp<DestinationsStackParamList, 'ThingsToSee'>;
-
-// Mock action for fetching attractions
-const fetchAttractions = (destinationId: string, subDestinationId?: string) => {
-  return (dispatch: any) => {
-    dispatch({ type: 'FETCH_THINGS_TO_SEE_REQUEST' });
-
-    // Simulate API call
-    setTimeout(() => {
-      // This would be an API call in a real app
-      const mockAttractions: Attraction[] = [
-        {
-          id: '1',
-          name: 'Grand Palace',
-          description: 'Former residence of the Kings of Thailand. The Grand Palace is the most famous landmark in Bangkok.',
-          category: 'Historical',
-          location: {
-            latitude: 13.7500,
-            longitude: 100.4910,
-          },
-          imageUrl: 'https://example.com/grand-palace.jpg',
-          rating: 4.7,
-          openingHours: '8:30 AM - 3:30 PM',
-          price: '500 THB',
-          tags: ['Temple', 'Palace', 'Must See']
-        },
-        {
-          id: '2',
-          name: 'Chatuchak Weekend Market',
-          description: 'One of the world\'s largest weekend markets covering 35 acres with over 8,000 stalls.',
-          category: 'Shopping',
-          location: {
-            latitude: 13.7999,
-            longitude: 100.5500,
-          },
-          imageUrl: 'https://example.com/chatuchak.jpg',
-          rating: 4.5,
-          openingHours: 'Saturday-Sunday 9:00 AM - 6:00 PM',
-          price: 'Free',
-          tags: ['Market', 'Shopping', 'Food']
-        },
-        {
-          id: '3',
-          name: 'Wat Arun',
-          description: 'Temple of Dawn is a Buddhist temple on the west bank of the Chao Phraya River.',
-          category: 'Religious',
-          location: {
-            latitude: 13.7437,
-            longitude: 100.4888,
-          },
-          imageUrl: 'https://example.com/wat-arun.jpg',
-          rating: 4.6,
-          openingHours: '8:00 AM - 6:00 PM',
-          price: '50 THB',
-          tags: ['Temple', 'Historical', 'Riverside']
-        },
-        {
-          id: '4',
-          name: 'Jim Thompson House',
-          description: 'Museum housing the art collection of American businessman Jim Thompson.',
-          category: 'Museum',
-          location: {
-            latitude: 13.7501,
-            longitude: 100.5001,
-          },
-          imageUrl: 'https://example.com/jim-thompson.jpg',
-          rating: 4.3,
-          openingHours: '9:00 AM - 6:00 PM',
-          price: '200 THB',
-          tags: ['Museum', 'Culture', 'Architecture']
-        },
-        {
-          id: '5',
-          name: 'Lumpini Park',
-          description: 'Inner-city park covering 142 acres with lakes and recreation areas.',
-          category: 'Nature',
-          location: {
-            latitude: 13.7314,
-            longitude: 100.5420,
-          },
-          imageUrl: 'https://example.com/lumpini.jpg',
-          rating: 4.4,
-          openingHours: '4:30 AM - 9:00 PM',
-          price: 'Free',
-          tags: ['Park', 'Nature', 'Recreation']
-        },
-      ];
-
-      dispatch({
-        type: 'FETCH_THINGS_TO_SEE_SUCCESS',
-        payload: {
-          destinationId,
-          attractions: mockAttractions,
-        },
-      });
-    }, 1000);
-  };
-};
 
 const categories = [
   { id: 'all', name: 'All', icon: 'grid-outline' },

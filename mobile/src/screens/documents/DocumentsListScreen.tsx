@@ -28,132 +28,6 @@ type DocumentsScreenNavigationProp = StackNavigationProp<
   'DocumentsList'
 >;
 
-// Mock action to fetch travel documents
-const fetchTravelDocuments = () => {
-  return (dispatch: any) => {
-    // This would be an API call in a real app
-    dispatch({ type: 'FETCH_PROFILE_REQUEST' });
-    
-    // Simulate API call with timeout
-    setTimeout(() => {
-      const mockDocuments: TravelDocument[] = [
-        {
-          id: '1',
-          type: 'flight',
-          title: 'Bangkok Flight',
-          destination: 'Thailand',
-          startDate: '2025-06-02',
-          endDate: '2025-06-10',
-          fileUrl: 'https://example.com/flight-ticket.pdf',
-          uploadDate: '2025-01-15',
-          status: 'verified',
-          details: {
-            flightNumber: 'TG315',
-            airline: 'Thai Airways',
-          },
-        },
-        {
-          id: '2',
-          type: 'hotel',
-          title: 'Marriott Bangkok',
-          destination: 'Thailand',
-          startDate: '2025-06-02',
-          endDate: '2025-06-10',
-          fileUrl: 'https://example.com/hotel-booking.pdf',
-          uploadDate: '2025-01-15',
-          status: 'verified',
-          details: {
-            hotelName: 'Bangkok Marriott',
-            bookingReference: 'BKK12345',
-          },
-        },
-        {
-          id: '3',
-          type: 'flight',
-          title: 'Tokyo Flight',
-          destination: 'Japan',
-          startDate: '2025-07-15',
-          endDate: '2025-07-25',
-          fileUrl: 'https://example.com/flight-ticket-japan.pdf',
-          uploadDate: '2025-02-20',
-          status: 'pending',
-          details: {
-            flightNumber: 'NH872',
-            airline: 'ANA',
-          },
-        },
-        {
-          id: '4',
-          type: 'hotel',
-          title: 'Kyoto Ryokan',
-          destination: 'Japan',
-          startDate: '2025-07-18',
-          endDate: '2025-07-21',
-          fileUrl: 'https://example.com/ryokan-booking.pdf',
-          uploadDate: '2025-02-20',
-          status: 'verified',
-          details: {
-            hotelName: 'Traditional Kyoto Ryokan',
-            bookingReference: 'KYO54321',
-          },
-        },
-        {
-          id: '5',
-          type: 'other',
-          title: 'Japan Rail Pass',
-          destination: 'Japan',
-          startDate: '2025-07-15',
-          endDate: '2025-07-25',
-          fileUrl: 'https://example.com/jrpass.pdf',
-          uploadDate: '2025-02-25',
-          status: 'pending',
-        },
-      ];
-      
-      dispatch({ 
-        type: 'FETCH_PROFILE_SUCCESS', 
-        payload: {
-          id: 'user123',
-          name: 'John Smith',
-          email: 'john@example.com',
-          languages: ['English', 'Spanish'],
-          travelPreferences: ['Food', 'Culture', 'Nature'],
-          tripCount: 12,
-        }
-      });
-      
-      // In a real app, these might come in a separate API call
-      // or be part of the profile response
-      mockDocuments.forEach(doc => {
-        dispatch({
-          type: 'UPLOAD_DOCUMENT_SUCCESS',
-          payload: doc,
-        });
-      });
-      
-    }, 1000);
-  };
-};
-
-// Tab component
-interface TabProps {
-  title: string;
-  isActive: boolean;
-  onPress: () => void;
-}
-
-const Tab: React.FC<TabProps> = ({ title, isActive, onPress }) => (
-  <TouchableOpacity 
-    style={[styles.tab, isActive && styles.activeTab]} 
-    onPress={onPress}
-  >
-    <Text style={[styles.tabText, isActive && styles.activeTabText]}>
-      {title}
-    </Text>
-    {isActive && <View style={styles.activeIndicator} />}
-  </TouchableOpacity>
-);
-
 const DocumentsListScreen: React.FC = () => {
   const navigation = useNavigation<DocumentsScreenNavigationProp>();
   const dispatch = useDispatch();
@@ -168,7 +42,7 @@ const DocumentsListScreen: React.FC = () => {
   );
 
   useEffect(() => {
-    dispatch(fetchTravelDocuments() as any);
+    dispatch(fetchUserDocuments() as any);
   }, [dispatch]);
 
   const onRefresh = () => {
@@ -339,10 +213,29 @@ const DocumentsListScreen: React.FC = () => {
         title="Oops!"
         message={`Something went wrong: ${error}`}
         actionLabel="Try Again"
-        onAction={() => dispatch(fetchTravelDocuments() as any)}
+        onAction={() => dispatch(fetchUserDocuments() as any)}
       />
     );
   }
+
+  // Tab component
+  interface TabProps {
+    title: string;
+    isActive: boolean;
+    onPress: () => void;
+  }
+
+  const Tab: React.FC<TabProps> = ({ title, isActive, onPress }) => (
+    <TouchableOpacity 
+      style={[styles.tab, isActive && styles.activeTab]} 
+      onPress={onPress}
+    >
+      <Text style={[styles.tabText, isActive && styles.activeTabText]}>
+        {title}
+      </Text>
+      {isActive && <View style={styles.activeIndicator} />}
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>

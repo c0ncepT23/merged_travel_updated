@@ -13,10 +13,12 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
+import { useDispatch, useSelector } from 'react-redux';
 
 // Import types
 import { ProfileStackParamList } from '../../navigation/ProfileNavigator';
 import EmptyStateView from '../../components/common/EmptyStateView';
+import { RootState } from '../../store/reducers';
 
 type PastTripsNavigationProp = StackNavigationProp<
   ProfileStackParamList,
@@ -34,73 +36,44 @@ interface PastTrip {
   places: number;
 }
 
+// Define an action creator to fetch past trips
+const fetchPastTrips = () => {
+  return async (dispatch: any) => {
+    dispatch({ type: 'FETCH_PAST_TRIPS_REQUEST' });
+    
+    try {
+      // Call your API service to get past trips
+      const response = await fetch('your-api-endpoint/past-trips');
+      const data = await response.json();
+      
+      dispatch({
+        type: 'FETCH_PAST_TRIPS_SUCCESS',
+        payload: data
+      });
+    } catch (error) {
+      console.error('Error fetching past trips:', error);
+      dispatch({
+        type: 'FETCH_PAST_TRIPS_FAILURE',
+        payload: error.message
+      });
+    }
+  };
+};
+
 const PastTripsScreen: React.FC = () => {
   const navigation = useNavigation<PastTripsNavigationProp>();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
-  const [pastTrips, setPastTrips] = useState<PastTrip[]>([]);
+  
+  // Get past trips from Redux state (add this to your store if needed)
+  const pastTrips = useSelector((state: RootState) => state.profile.pastTrips || []);
+  const error = useSelector((state: RootState) => state.profile.error);
 
   useEffect(() => {
-    // In a real app, this would be an API call
     const loadPastTrips = async () => {
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        
-        // Mock data
-        const mockPastTrips: PastTrip[] = [
-          {
-            id: '1',
-            destination: 'Paris',
-            country: 'France',
-            startDate: '2024-02-10',
-            endDate: '2024-02-17',
-            imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34',
-            companions: 34,
-            places: 12
-          },
-          {
-            id: '2',
-            destination: 'Rome',
-            country: 'Italy',
-            startDate: '2023-10-05',
-            endDate: '2023-10-12',
-            imageUrl: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5',
-            companions: 42,
-            places: 15
-          },
-          {
-            id: '3',
-            destination: 'Barcelona',
-            country: 'Spain',
-            startDate: '2023-07-18',
-            endDate: '2023-07-25',
-            imageUrl: 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4',
-            companions: 28,
-            places: 9
-          },
-          {
-            id: '4',
-            destination: 'Tokyo',
-            country: 'Japan',
-            startDate: '2023-04-02',
-            endDate: '2023-04-10',
-            imageUrl: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26',
-            companions: 51,
-            places: 17
-          },
-          {
-            id: '5',
-            destination: 'New York',
-            country: 'USA',
-            startDate: '2023-01-14',
-            endDate: '2023-01-21',
-            imageUrl: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9',
-            companions: 47,
-            places: 14
-          }
-        ];
-        
-        setPastTrips(mockPastTrips);
+        // Dispatch action to load past trips
+        await dispatch(fetchPastTrips());
         setLoading(false);
       } catch (error) {
         console.error('Error loading past trips:', error);
@@ -109,7 +82,7 @@ const PastTripsScreen: React.FC = () => {
     };
     
     loadPastTrips();
-  }, []);
+  }, [dispatch]);
   
   const formatDateRange = (startDate: string, endDate: string) => {
     const start = format(new Date(startDate), 'MMM d');
@@ -181,6 +154,18 @@ const PastTripsScreen: React.FC = () => {
         <ActivityIndicator size="large" color="#0066CC" />
         <Text style={styles.loadingText}>Loading your past trips...</Text>
       </View>
+    );
+  }
+  
+  if (error) {
+    return (
+      <EmptyStateView
+        icon="alert-circle"
+        title="Error Loading Trips"
+        message={`Something went wrong: ${error}`}
+        actionLabel="Try Again"
+        onAction={() => dispatch(fetchPastTrips())}
+      />
     );
   }
   

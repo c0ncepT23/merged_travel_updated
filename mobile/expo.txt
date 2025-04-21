@@ -7,3 +7,4 @@ above for hot realoads to check dev changes on android app
 othjerwise for preview: npx eas build --platform android --profile preview
 
 traveltogetherapp@travelapp-457506.iam.gserviceaccount.com
+

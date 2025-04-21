@@ -23,67 +23,6 @@ import { Destination } from '../../store/reducers/destinationReducer';
 import EmptyStateView from '../../components/common/EmptyStateView';
 import { fetchDestinations } from '../../store/actions/destinationActions';
 
-// Mock action for fetching destinations (to be replaced with actual API call)
-// const fetchDestinations = () => {
-//   return (dispatch: any) => {
-//     // This would be replaced with an actual API call
-//     dispatch({ type: 'FETCH_DESTINATIONS_REQUEST' });
-    
-//     // Simulate API call with timeout
-//     setTimeout(() => {
-//       const mockDestinations: Destination[] = [
-//         {
-//           id: '1',
-//           name: 'Thailand',
-//           country: 'Thailand',
-//           startDate: '2025-06-02',
-//           endDate: '2025-06-10',
-//           isActive: true,
-//           memberCount: 42,
-//           subDestinations: [
-//             { id: '101', name: 'Bangkok', memberCount: 32, isJoined: true },
-//             { id: '102', name: 'Phuket', memberCount: 25, isJoined: false },
-//             { id: '103', name: 'Chiang Mai', memberCount: 18, isJoined: true }
-//           ]
-//         },
-//         {
-//           id: '2',
-//           name: 'Japan',
-//           country: 'Japan',
-//           startDate: '2025-07-15',
-//           endDate: '2025-07-25',
-//           isActive: true,
-//           memberCount: 65,
-//           subDestinations: [
-//             { id: '201', name: 'Tokyo', memberCount: 52, isJoined: true },
-//             { id: '202', name: 'Kyoto', memberCount: 38, isJoined: true },
-//             { id: '203', name: 'Osaka', memberCount: 41, isJoined: true }
-//           ]
-//         },
-//         {
-//           id: '3',
-//           name: 'Italy',
-//           country: 'Italy',
-//           startDate: '2025-09-10',
-//           endDate: '2025-09-18',
-//           isActive: false,
-//           memberCount: 78,
-//           subDestinations: [
-//             { id: '301', name: 'Rome', memberCount: 60, isJoined: false },
-//             { id: '302', name: 'Florence', memberCount: 45, isJoined: false },
-//             { id: '303', name: 'Venice', memberCount: 38, isJoined: false }
-//           ]
-//         }
-//       ];
-      
-//       dispatch({ 
-//         type: 'FETCH_DESTINATIONS_SUCCESS', 
-//         payload: mockDestinations 
-//       });
-//     }, 1000);
-//   };
-// };
-
 type DestinationsScreenNavigationProp = StackNavigationProp<
   DestinationsStackParamList,
   'DestinationsList'

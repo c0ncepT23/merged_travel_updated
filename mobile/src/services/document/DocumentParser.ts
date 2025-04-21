@@ -388,21 +388,46 @@ export const parseDocument = async (
     
     let extractedText = '';
     
-    if (isImage) {
-      // Resize the image to improve OCR accuracy and reduce upload size
-      const manipResult = await ImageManipulator.manipulateAsync(
-        fileUri,
-        [{ resize: { width: 1000 } }],
-        { format: ImageManipulator.SaveFormat.JPEG, compress: 0.7 }
-      );
-      
-      // Send the image to backend service for OCR
-      console.log('Processing image with backend OCR service');
-      extractedText = await performDocumentOCR(manipResult.uri, 'image/jpeg');
-    } else if (isPdf) {
-      // Send the PDF directly to backend for processing
-      console.log('Processing PDF with backend OCR service');
-      extractedText = await performDocumentOCR(fileUri, 'application/pdf');
+    // Configure your actual server URL (replace with your production URL)
+    const serverUrl = "https://0a53-2406-b400-b4-a2de-c45e-60e0-70c0-6e40.ngrok-free.app";
+    
+    // Create form data for file upload
+    const formData = new FormData();
+    
+    // Get the filename from the URI
+    const filename = fileUri.split('/').pop() || 'document';
+    
+    // Add the file to form data
+    formData.append('image', {
+      uri: fileUri,
+      name: filename,
+      type: isPdf ? 'application/pdf' : 'image/jpeg'
+    } as any);
+    
+    console.log('Sending document to OCR server...');
+    
+    // Send the document to backend for processing
+    const response = await fetch(`${serverUrl}/api/ocr`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    // Check if the request was successful
+    if (!response.ok) {
+      throw new Error(`Server responded with status: ${response.status}`);
+    }
+    
+    const responseData = await response.json();
+    
+    if (responseData.success) {
+      console.log('OCR successful, text length:', responseData.text.length);
+      extractedText = responseData.text;
+    } else {
+      console.error('OCR failed:', responseData.error);
+      throw new Error(responseData.error || 'Failed to extract text');
     }
     
     // If we couldn't extract text, inform the user
