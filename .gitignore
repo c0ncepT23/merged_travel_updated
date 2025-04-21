@@ -1,0 +1,15 @@
+# Root .gitignore
+node_modules/
+.DS_Store
+.env
+*.log
+
+# Mobile specific
+mobile/ios/Pods/
+mobile/android/build/
+mobile/android/app/build/
+
+# Server specific
+server/dist/
+server/uploads/
+server/serviceAccountKey.json

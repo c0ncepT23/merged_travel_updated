@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Travel Together",
+    "slug": "travel-together",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.mawnster.traveltogether",
+      "permissions": ["INTERNET"]
+    },
+    "newArchEnabled": true,
+    "extra": {
+      "eas": {
+        "projectId": "edb791c9-bcdc-41eb-8e2b-238395ffd2da"
+      }
+    }
+  }
+}
