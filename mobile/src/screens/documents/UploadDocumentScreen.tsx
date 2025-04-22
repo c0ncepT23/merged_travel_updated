@@ -392,7 +392,9 @@ const UploadDocumentScreen: React.FC = () => {
     setUploading(true);
     
     try {
-      console.log('Processing document:', fileUri, fileType);
+      console.log('=== Starting Document Upload Process ===');
+      console.log('File URI:', fileUri);
+      console.log('File Type:', fileType);
       
       // Check if it's an image or PDF
       const isImage = fileType.toLowerCase().includes('image') || 
@@ -406,10 +408,13 @@ const UploadDocumentScreen: React.FC = () => {
         return;
       }
       
+      console.log('=== Step 1: Parsing Document with OCR ===');
       // Process the document using our DocumentParser service
       const result = await parseDocument(fileUri, fileType);
+      console.log('OCR Parse Result:', result);
       
       if (result.success && result.data) {
+        console.log('=== Step 2: Preparing Document Data ===');
         // Create the document data
         const documentData = {
           type: result.data.type,
@@ -420,24 +425,59 @@ const UploadDocumentScreen: React.FC = () => {
           fileUrl: fileUri,
           details: result.data.details,
         };
+        console.log('Document Data Prepared:', documentData);
         
-        // Add document to Firestore via Redux action
-        const documentId = await dispatch(uploadDocument(documentData) as any);
-        
-        setUploading(false);
-        Alert.alert(
-          'Success',
-          'Document uploaded and processed successfully.',
-          [{ text: 'OK', onPress: () => navigation.goBack() }]
-        );
+        console.log('=== Step 3: Uploading to Firestore ===');
+        try {
+          // Log the start of Firestore upload
+          console.log('Starting Firestore upload at:', new Date().toISOString());
+          
+          // Add document to Firestore via Redux action
+          const documentId = await dispatch(uploadDocument(documentData) as any);
+          
+          console.log('Firestore upload completed at:', new Date().toISOString());
+          console.log('Document ID:', documentId);
+          
+          setUploading(false);
+          Alert.alert(
+            'Success',
+            'Document uploaded and processed successfully.',
+            [{ text: 'OK', onPress: () => navigation.goBack() }]
+          );
+        } catch (firestoreError) {
+          console.error('=== Firestore Upload Error ===');
+          console.error('Error type:', firestoreError.name);
+          console.error('Error message:', firestoreError.message);
+          console.error('Full error object:', firestoreError);
+          throw firestoreError; // Re-throw to be caught by outer catch
+        }
       } else {
+        console.log('=== OCR Parse Failed ===');
+        console.log('Error:', result.error);
         setUploading(false);
         Alert.alert('Error', result.error || 'Failed to process document');
       }
     } catch (error) {
-      console.error('Error uploading document:', error);
+      console.error('=== Final Error Catch ===');
+      console.error('Error type:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Full error object:', error);
+      
+      // More specific error messages based on error type
+      let errorMessage = 'Failed to upload document. Please try again.';
+      
+      if (error.message.includes('network')) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (error.message.includes('permission')) {
+        errorMessage = 'Permission denied. Please check your Firebase rules.';
+      } else if (error.message.includes('auth')) {
+        errorMessage = 'Authentication error. Please try logging out and back in.';
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Upload timed out. Please try again with a stable connection.';
+      }
+      
       setUploading(false);
-      Alert.alert('Error', 'Failed to upload document. Please try again.');
+      Alert.alert('Error', errorMessage);
     }
   };
   
@@ -566,7 +606,7 @@ const UploadDocumentScreen: React.FC = () => {
   const testUpload = async () => {
     try {
       // Use the configured server URL - replace this with your actual server URL in production
-      const ngrokUrl = "https://0a53-2406-b400-b4-a2de-c45e-60e0-70c0-6e40.ngrok-free.app";
+      const serverUrl = "https://5815-2406-b400-b4-a2de-f8a0-ba6f-f34f-98d4.ngrok-free.app";
       
       // Pick an image
       const result = await ImagePicker.launchImageLibraryAsync({

@@ -79,15 +79,25 @@ export const updateUserProfile = (profileData: any) => {
 // Upload travel document
 export const uploadDocument = (documentData: Partial<TravelDocument>) => {
   return async (dispatch: Dispatch) => {
+    console.log('=== UploadDocument Action Started ===');
     dispatch({ type: UPLOAD_DOCUMENT_REQUEST });
     
     try {
+      console.log('Checking authentication status...');
       const currentUser = auth.currentUser;
       if (!currentUser) {
+        console.error('No authenticated user found');
         throw new Error('User not authenticated');
       }
+      console.log('User authenticated:', currentUser.uid);
+      
+      console.log('Calling documentService.addDocument with data:', documentData);
+      console.log('Starting Firestore operation at:', new Date().toISOString());
       
       const document = await documentService.addDocument(documentData as TravelDocument);
+      
+      console.log('Document added successfully at:', new Date().toISOString());
+      console.log('Document ID:', document.id);
       
       dispatch({
         type: UPLOAD_DOCUMENT_SUCCESS,
@@ -97,7 +107,11 @@ export const uploadDocument = (documentData: Partial<TravelDocument>) => {
       return document.id;
       
     } catch (error) {
-      console.error('Error uploading document:', error);
+      console.error('=== Error in UploadDocument Action ===');
+      console.error('Error type:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Full error:', error);
+      
       dispatch({
         type: UPLOAD_DOCUMENT_FAILURE,
         payload: error instanceof Error ? error.message : String(error)

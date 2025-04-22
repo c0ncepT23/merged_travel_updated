@@ -6,7 +6,7 @@ import { Alert, Platform } from 'react-native';
 import axios from 'axios';
 
 // Backend API URL
-const API_URL = 'https://91b7-2406-b400-b4-a2de-f8a0-ba6f-f34f-98d4.ngrok-free.app/api/ocr';
+const API_URL = "https://5815-2406-b400-b4-a2de-f8a0-ba6f-f34f-98d4.ngrok-free.app";
 
 /**
  * This implementation uses a backend service with Google Cloud Vision API for OCR
@@ -389,7 +389,7 @@ export const parseDocument = async (
     let extractedText = '';
     
     // Configure your actual server URL (replace with your production URL)
-    const serverUrl = "https://0a53-2406-b400-b4-a2de-c45e-60e0-70c0-6e40.ngrok-free.app";
+    const serverUrl = "https://5815-2406-b400-b4-a2de-f8a0-ba6f-f34f-98d4.ngrok-free.app/api/ocr";
     
     // Create form data for file upload
     const formData = new FormData();
@@ -407,7 +407,7 @@ export const parseDocument = async (
     console.log('Sending document to OCR server...');
     
     // Send the document to backend for processing
-    const response = await fetch(`${serverUrl}/api/ocr`, {
+    const response = await fetch(`${API_URL}/api/ocr`, {
       method: 'POST',
       body: formData,
       headers: {

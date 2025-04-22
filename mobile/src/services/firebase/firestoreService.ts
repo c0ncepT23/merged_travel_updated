@@ -65,21 +65,43 @@ export const userService = {
 export const documentService = {
   // Add a new travel document
   async addDocument(document: TravelDocument) {
+    console.log('=== DocumentService.addDocument Started ===');
+    
     const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error('User not authenticated');
+    if (!currentUser) {
+      console.error('No current user found in auth');
+      throw new Error('User not authenticated');
+    }
+    console.log('Current user ID:', currentUser.uid);
     
     const documentWithUser = {
       ...document,
       userId: currentUser.uid,
       createdAt: serverTimestamp(),
     };
+    console.log('Document with user info:', documentWithUser);
     
-    const docRef = await addDoc(collection(db, DOCUMENTS_COLLECTION), documentWithUser);
-    
-    return {
-      id: docRef.id,
-      ...documentWithUser
-    };
+    try {
+      console.log('Attempting to add document to collection:', DOCUMENTS_COLLECTION);
+      console.log('Firestore instance:', db ? 'exists' : 'null');
+      console.log('Starting addDoc operation at:', new Date().toISOString());
+      
+      const docRef = await addDoc(collection(db, DOCUMENTS_COLLECTION), documentWithUser);
+      
+      console.log('Document successfully added at:', new Date().toISOString());
+      console.log('Document reference ID:', docRef.id);
+      
+      return {
+        id: docRef.id,
+        ...documentWithUser
+      };
+    } catch (firestoreError) {
+      console.error('=== Firestore addDoc Error ===');
+      console.error('Error code:', firestoreError.code);
+      console.error('Error message:', firestoreError.message);
+      console.error('Full error:', firestoreError);
+      throw firestoreError;
+    }
   },
 
   // Get all documents for current user
