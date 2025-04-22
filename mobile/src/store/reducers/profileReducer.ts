@@ -10,6 +10,8 @@ export const UPDATE_PROFILE_FAILURE = 'UPDATE_PROFILE_FAILURE';
 export const UPLOAD_DOCUMENT_REQUEST = 'UPLOAD_DOCUMENT_REQUEST';
 export const UPLOAD_DOCUMENT_SUCCESS = 'UPLOAD_DOCUMENT_SUCCESS';
 export const UPLOAD_DOCUMENT_FAILURE = 'UPLOAD_DOCUMENT_FAILURE';
+export const VERIFY_DOCUMENT_SUCCESS = 'VERIFY_DOCUMENT_SUCCESS';
+export const REJECT_DOCUMENT_SUCCESS = 'REJECT_DOCUMENT_SUCCESS';
 
 // Define travel document interface
 export interface TravelDocument {
@@ -22,6 +24,9 @@ export interface TravelDocument {
   fileUrl: string;
   uploadDate: string;
   status: 'pending' | 'verified' | 'rejected';
+  verifiedAt?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
   details?: {
     flightNumber?: string;
     airline?: string;
@@ -104,6 +109,29 @@ const profileReducer = (
         ...state,
         uploadingDocument: false,
         error: action.payload,
+      };
+    case VERIFY_DOCUMENT_SUCCESS:
+      return {
+        ...state,
+        travelDocuments: state.travelDocuments.map(doc => 
+          doc.id === action.payload.id 
+            ? { ...doc, status: 'verified', verifiedAt: action.payload.verifiedAt }
+            : doc
+        ),
+      };
+    case REJECT_DOCUMENT_SUCCESS:
+      return {
+        ...state,
+        travelDocuments: state.travelDocuments.map(doc => 
+          doc.id === action.payload.id 
+            ? { 
+                ...doc, 
+                status: 'rejected', 
+                rejectedAt: action.payload.rejectedAt,
+                rejectionReason: action.payload.rejectionReason 
+              }
+            : doc
+        ),
       };
     default:
       return state;

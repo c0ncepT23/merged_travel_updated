@@ -1,10 +1,16 @@
+// src/services/firebase/firebaseConfig.ts
 import { initializeApp } from 'firebase/app';
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { 
+  initializeAuth,
+  getReactNativePersistence
+} from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getFirestore } from 'firebase/firestore';
+import { 
+  initializeFirestore
+} from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-// Replace this with your Firebase project configuration
+// Your Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDsSrbbfnm5lRTxPfbaEmM-TgkwSLX5_NA",
   authDomain: "travel-together-7cd3d.firebaseapp.com",
@@ -16,17 +22,22 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
 // Initialize Auth with persistence
 const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage)
 });
-const db = getFirestore(app);
+
+// Initialize Firestore with specific settings for React Native
+const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true, // This can help with WebChannel issues
+  useFetchStreams: false, // Disable Fetch streams for better compatibility
+  cacheSizeBytes: 1048576 // 1MB cache (smaller cache for mobile)
+});
+
+// Initialize Storage
 const storage = getStorage(app);
 
+// Export instances
 export { auth, db, storage };
-// Enable offline persistence for Firestore
-// firestore().settings({
-//     persistence: true, // Enable offline cache
-//   });
-
 export default app;

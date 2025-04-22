@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 
@@ -22,6 +22,7 @@ import { TravelDocument } from '../../store/reducers/profileReducer';
 import { documentService } from '../../services/firebase/firestoreService';
 import { storageService } from '../../services/firebase/storageService';
 import { useDocumentViewer } from '../../hooks/useDocumentViewer';
+import { verifyDocument, rejectDocument } from '../../store/actions/profileActions';
 
 type DocumentDetailRouteProp = RouteProp<
   DocumentsStackParamList,
@@ -36,6 +37,7 @@ type DocumentDetailNavigationProp = StackNavigationProp<
 const DocumentDetailScreen: React.FC = () => {
   const route = useRoute<DocumentDetailRouteProp>();
   const navigation = useNavigation<DocumentDetailNavigationProp>();
+  const dispatch = useDispatch();
   const { documentId } = route.params;
   
   const [loading, setLoading] = useState(true);
@@ -71,6 +73,42 @@ const DocumentDetailScreen: React.FC = () => {
       Alert.alert(
         'No Document',
         'This document does not have an associated file.'
+      );
+    }
+  };
+  
+  const handleVerifyDocument = async () => {
+    if (document) {
+      try {
+        await dispatch(verifyDocument(document.id));
+        Alert.alert('Success', 'Document has been verified!');
+      } catch (error) {
+        Alert.alert('Error', 'Failed to verify document');
+      }
+    }
+  };
+  
+  const handleRejectDocument = async () => {
+    if (document) {
+      Alert.prompt(
+        'Reject Document',
+        'Enter rejection reason (optional):',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Reject',
+            style: 'destructive',
+            onPress: async (reason) => {
+              try {
+                await dispatch(rejectDocument(document.id, reason));
+                Alert.alert('Success', 'Document has been rejected');
+              } catch (error) {
+                Alert.alert('Error', 'Failed to reject document');
+              }
+            }
+          }
+        ],
+        'plain-text'
       );
     }
   };
@@ -189,7 +227,37 @@ const DocumentDetailScreen: React.FC = () => {
               ? 'This document is being reviewed. You will be notified once it is verified.'
               : 'This document has been rejected. Please upload a valid document.'}
           </Text>
+          
+          {document.status === 'rejected' && document.rejectionReason && (
+            <Text style={styles.rejectionReason}>
+              Reason: {document.rejectionReason}
+            </Text>
+          )}
         </View>
+        
+        {/* Admin verification buttons (for testing) */}
+        {__DEV__ && document.status === 'pending' && (
+          <View style={styles.adminSection}>
+            <Text style={styles.adminTitle}>Admin Actions (Dev Only)</Text>
+            <View style={styles.adminButtons}>
+              <TouchableOpacity
+                style={[styles.adminButton, styles.verifyButton]}
+                onPress={handleVerifyDocument}
+              >
+                <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
+                <Text style={styles.adminButtonText}>Verify</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.adminButton, styles.rejectButton]}
+                onPress={handleRejectDocument}
+              >
+                <Ionicons name="close-circle" size={20} color="#FFFFFF" />
+                <Text style={styles.adminButtonText}>Reject</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
         
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Document Details</Text>
@@ -205,6 +273,13 @@ const DocumentDetailScreen: React.FC = () => {
             <Text style={styles.detailLabel}>Upload Date</Text>
             <Text style={styles.detailValue}>{formatDate(document.uploadDate)}</Text>
           </View>
+          
+          {document.verifiedAt && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Verified Date</Text>
+              <Text style={styles.detailValue}>{formatDate(document.verifiedAt)}</Text>
+            </View>
+          )}
           
           {document.type === 'flight' && document.details && (
             <>
@@ -356,6 +431,46 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666666',
     lineHeight: 20,
+  },
+  rejectionReason: {
+    fontSize: 14,
+    color: '#F44336',
+    fontStyle: 'italic',
+    marginTop: 8,
+  },
+  adminSection: {
+    padding: 20,
+    backgroundColor: '#F8F8F8',
+    marginTop: 16,
+  },
+  adminTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 12,
+  },
+  adminButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  adminButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+    flex: 0.48,
+  },
+  verifyButton: {
+    backgroundColor: '#4CAF50',
+  },
+  rejectButton: {
+    backgroundColor: '#F44336',
+  },
+  adminButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    marginLeft: 8,
   },
   section: {
     padding: 20,

@@ -10,7 +10,9 @@ import {
   UPDATE_PROFILE_FAILURE,
   UPLOAD_DOCUMENT_REQUEST,
   UPLOAD_DOCUMENT_SUCCESS,
-  UPLOAD_DOCUMENT_FAILURE
+  UPLOAD_DOCUMENT_FAILURE,
+  VERIFY_DOCUMENT_SUCCESS,
+  REJECT_DOCUMENT_SUCCESS
 } from '../reducers/profileReducer';
 import { TravelDocument } from '../reducers/profileReducer';
 
@@ -136,6 +138,49 @@ export const fetchUserDocuments = () => {
       
     } catch (error) {
       console.error('Error fetching documents:', error);
+    }
+  };
+};
+
+// Verify a document
+export const verifyDocument = (documentId: string) => {
+  return async (dispatch: Dispatch) => {
+    try {
+      await documentService.verifyDocument(documentId);
+      
+      dispatch({
+        type: VERIFY_DOCUMENT_SUCCESS,
+        payload: {
+          id: documentId,
+          verifiedAt: new Date().toISOString()
+        }
+      });
+      
+    } catch (error) {
+      console.error('Error verifying document:', error);
+      throw error;
+    }
+  };
+};
+
+// Reject a document
+export const rejectDocument = (documentId: string, reason?: string) => {
+  return async (dispatch: Dispatch) => {
+    try {
+      await documentService.rejectDocument(documentId, reason);
+      
+      dispatch({
+        type: REJECT_DOCUMENT_SUCCESS,
+        payload: {
+          id: documentId,
+          rejectedAt: new Date().toISOString(),
+          rejectionReason: reason
+        }
+      });
+      
+    } catch (error) {
+      console.error('Error rejecting document:', error);
+      throw error;
     }
   };
 };

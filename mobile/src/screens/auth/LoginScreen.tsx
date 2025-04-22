@@ -18,7 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 // Import types and services
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
-import { useAuth } from '../../services/auth/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 type LoginScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,

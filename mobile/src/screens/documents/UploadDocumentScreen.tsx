@@ -414,29 +414,47 @@ const UploadDocumentScreen: React.FC = () => {
       console.log('OCR Parse Result:', result);
       
       if (result.success && result.data) {
-        console.log('=== Step 2: Preparing Document Data ===');
-        // Create the document data
+        console.log('=== Step 2: Uploading File to Firebase Storage ===');
+        
+        // Upload file to Firebase Storage
+        let downloadUrl = '';
+        try {
+          const uploadResult = await storageService.uploadDocumentFile(
+            fileUri,
+            result.data.type, // 'flight' or 'hotel' or 'other'
+            (progress) => {
+              setUploadProgress(progress);
+              console.log(`Upload progress: ${(progress * 100).toFixed(2)}%`);
+            }
+          );
+          
+          downloadUrl = uploadResult;
+          console.log('File uploaded successfully. Download URL:', downloadUrl);
+        } catch (storageError) {
+          console.error('Storage Upload Error:', storageError);
+          throw new Error('Failed to upload file to storage');
+        }
+        
+        console.log('=== Step 3: Saving Document to Firestore ===');
+        // Create the document data with the storage URL
         const documentData = {
           type: result.data.type,
           title: result.data.title,
           destination: result.data.destination,
           startDate: result.data.startDate,
           endDate: result.data.endDate,
-          fileUrl: fileUri,
+          fileUrl: downloadUrl, // Use the Firebase Storage URL instead of local path
           details: result.data.details,
+          status: 'pending',
+          uploadDate: new Date().toISOString()
         };
         console.log('Document Data Prepared:', documentData);
         
-        console.log('=== Step 3: Uploading to Firestore ===');
         try {
-          // Log the start of Firestore upload
-          console.log('Starting Firestore upload at:', new Date().toISOString());
-          
           // Add document to Firestore via Redux action
           const documentId = await dispatch(uploadDocument(documentData) as any);
           
-          console.log('Firestore upload completed at:', new Date().toISOString());
-          console.log('Document ID:', documentId);
+          console.log('Document saved successfully with ID:', documentId);
           
           setUploading(false);
           Alert.alert(
@@ -444,12 +462,20 @@ const UploadDocumentScreen: React.FC = () => {
             'Document uploaded and processed successfully.',
             [{ text: 'OK', onPress: () => navigation.goBack() }]
           );
-        } catch (firestoreError) {
+        } catch (firestoreError: any) {
           console.error('=== Firestore Upload Error ===');
-          console.error('Error type:', firestoreError.name);
-          console.error('Error message:', firestoreError.message);
-          console.error('Full error object:', firestoreError);
-          throw firestoreError; // Re-throw to be caught by outer catch
+          console.error('Error:', firestoreError);
+          
+          let errorMessage = 'Failed to save document. Please try again.';
+          
+          if (firestoreError.message.includes('Network')) {
+            errorMessage = 'Network error. Please check your internet connection and try again.';
+          } else if (firestoreError.message.includes('Permission')) {
+            errorMessage = 'Permission error. Please sign out and sign in again.';
+          }
+          
+          setUploading(false);
+          Alert.alert('Error', errorMessage);
         }
       } else {
         console.log('=== OCR Parse Failed ===');
@@ -457,27 +483,12 @@ const UploadDocumentScreen: React.FC = () => {
         setUploading(false);
         Alert.alert('Error', result.error || 'Failed to process document');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('=== Final Error Catch ===');
-      console.error('Error type:', error.name);
-      console.error('Error message:', error.message);
-      console.error('Full error object:', error);
-      
-      // More specific error messages based on error type
-      let errorMessage = 'Failed to upload document. Please try again.';
-      
-      if (error.message.includes('network')) {
-        errorMessage = 'Network error. Please check your internet connection.';
-      } else if (error.message.includes('permission')) {
-        errorMessage = 'Permission denied. Please check your Firebase rules.';
-      } else if (error.message.includes('auth')) {
-        errorMessage = 'Authentication error. Please try logging out and back in.';
-      } else if (error.message.includes('timeout')) {
-        errorMessage = 'Upload timed out. Please try again with a stable connection.';
-      }
+      console.error('Error:', error);
       
       setUploading(false);
-      Alert.alert('Error', errorMessage);
+      Alert.alert('Error', error.message || 'Failed to upload document. Please try again.');
     }
   };
   

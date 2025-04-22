@@ -23,10 +23,7 @@ import { Destination } from '../../store/reducers/destinationReducer';
 import EmptyStateView from '../../components/common/EmptyStateView';
 import { fetchDestinations } from '../../store/actions/destinationActions';
 
-type DestinationsScreenNavigationProp = StackNavigationProp<
-  DestinationsStackParamList,
-  'DestinationsList'
->;
+type DestinationsScreenNavigationProp = StackNavigationProp<DestinationsStackParamList, 'DestinationsList'>;
 
 const DestinationsListScreen: React.FC = () => {
   const navigation = useNavigation<DestinationsScreenNavigationProp>();
@@ -60,9 +57,10 @@ const DestinationsListScreen: React.FC = () => {
 
   // Render each destination item
   const renderDestinationItem = ({ item }: { item: Destination }) => {
-    const activeJoinedSubdestinations = item.subDestinations.filter(
-      sub => sub.isJoined
-    ).length;
+    // Add null check for subDestinations
+    const activeJoinedSubdestinations = item.subDestinations?.filter(
+      sub => sub?.isJoined === true
+    ).length || 0;
     
     return (
       <TouchableOpacity
@@ -88,7 +86,7 @@ const DestinationsListScreen: React.FC = () => {
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Ionicons name="people-outline" size={16} color="#666" />
-            <Text style={styles.statText}>{item.memberCount} travelers</Text>
+            <Text style={styles.statText}>{item.memberCount || 0} travelers</Text>
           </View>
           
           <View style={styles.statItem}>
@@ -103,25 +101,30 @@ const DestinationsListScreen: React.FC = () => {
         
         <View style={styles.footer}>
           <View style={styles.subDestRow}>
-            {item.subDestinations.slice(0, 3).map((subDest) => (
-              <View 
-                key={subDest.id} 
-                style={[
-                  styles.subDestChip,
-                  subDest.isJoined ? styles.joinedChip : styles.notJoinedChip
-                ]}
-              >
-                <Text 
+            {(item.subDestinations || []).slice(0, 3).map((subDest) => {
+              // Add null check for subDest
+              if (!subDest) return null;
+              
+              return (
+                <View 
+                  key={subDest.id} 
                   style={[
-                    styles.subDestText,
-                    subDest.isJoined ? styles.joinedText : styles.notJoinedText
+                    styles.subDestChip,
+                    subDest.isJoined ? styles.joinedChip : styles.notJoinedChip
                   ]}
                 >
-                  {subDest.name}
-                </Text>
-              </View>
-            ))}
-            {item.subDestinations.length > 3 && (
+                  <Text 
+                    style={[
+                      styles.subDestText,
+                      subDest.isJoined ? styles.joinedText : styles.notJoinedText
+                    ]}
+                  >
+                    {subDest.name}
+                  </Text>
+                </View>
+              );
+            })}
+            {item.subDestinations && item.subDestinations.length > 3 && (
               <View style={styles.moreChip}>
                 <Text style={styles.moreText}>
                   +{item.subDestinations.length - 3}
